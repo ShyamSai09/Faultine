@@ -1,0 +1,35 @@
+An on-call alert fired with no deploy in 30 days. The agent linked it to two outages from March and June, flagged two *other* services running the same broken config, and pointed at a postmortem action written twice and closed never.
+
+Here's what made that possible — and the part that surprised me.
+
+**1. Postmortems are write-only.**
+19 incidents. 19 remediation actions never completed. Three are the same action written for the third time. Every one is a future outage someone already paid for once.
+
+**2. Similarity search cannot join those documents.**
+Vector search finds the postmortem that looks like your alert. It cannot tell you that the March incident is *linked* to an action item in a separate memory bank that was never closed. I used two isolated banks — technical corpus vs. commitment ledger — because that join is the whole product.
+
+**3. The sentence that answers the question was never in any document.**
+[Hindsight](https://hindsight.vectorize.io/) consolidates facts into evidence-backed observations. During triage it produced:
+
+> Services payout-worker, inventory-sync, and webhooks-relay are currently identified as carrying the insecure IAM role trust policy.
+
+Four documents, four services, four months → one belief. And it *rewrites* it when evidence changes. Retrieval can't do that — the artefact that answers the question didn't exist before.
+
+**4. The model was confidently wrong, so I stopped asking it.**
+Asked which services were exposed, it named ones already patched — they appeared in the incidents it had just cited. Defensible reasoning, wrong answer, and costly mid-incident. Now it returns only *which* condition matches; code builds the list from recorded state. Let the model do judgement, the code do bookkeeping.
+
+**Before/after, built to be unarguable:**
+```
+memory on    MATCH: 100   INCIDENTS: INC-1042, INC-1188   RUNBOOK: RB-07   OPEN_ACTION: written 2×
+memory off   MATCH: 0     INCIDENTS: none                 RUNBOOK: none    OPEN_ACTION: none
+```
+Memory-off is the *same* model on a never-written bank. Memory is the only variable — not a deliberately weaker prompt.
+
+**5. I scored it instead of claiming it.**
+Hand-labelled answer key, 83% recovery, 5/6. The one miss is shown, not hidden: identical anti-pattern, almost no shared vocabulary. Then I cut the key from 10 clusters to 7 when 3 pairs shared a theme but not a root cause — the number was flattering because my key was wrong.
+
+Worth flagging for anyone building on Hindsight: the sync Python client binds its connection pool to the first event loop that touches it. Second thread → `Timeout context manager should be used inside a task`. And `asyncio.to_thread` makes it *worse*, not better.
+
+Full write-up: [REPO_URL] → article.md
+
+#AIAgents #AgentMemory #Hindsight #AI #LLM

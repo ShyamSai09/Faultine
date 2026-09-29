@@ -1,0 +1,331 @@
+/* Faultline — design tokens and primitives.
+   Direction and the reason for every value live in DESIGN.md. */
+
+:root {
+  /* Paper and ink. Warm off-white, warm near-black: document stock, not screen white. */
+  --paper:      #F2EFE9;
+  --paper-2:    #E9E5DC;   /* sunken surface for pasted machine output */
+  --paper-3:    #E1DCD1;   /* one step further down, for wells */
+  --ink:        #191917;
+  --ink-2:      #4A4740;   /* secondary text, 8.07:1 on paper */
+  --ink-3:      #5F5B52;   /* labels and captions, 5.38:1 worst case */
+  --rule:       #CFC9BC;   /* decorative hairlines only, never a focus ring */
+  --rule-2:     #B9B2A3;   /* table rules, slightly firmer */
+  --edge:       #4A4740;   /* borders on interactive elements, 3:1 minimum */
+
+  /* The accent means one thing only: this finding is still open. */
+  --red:        #A32B21;
+  --red-deep:   #8C241B;
+  --red-wash:   #F6E7E4;
+
+  --sans:  'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono:  'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --gutter: 104px;   /* the ruled margin: metadata lives here and nowhere else */
+  --gap:    28px;
+  --edge-r: 3px;     /* one radius, used sparingly; square by default */
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.62;
+  font-variant-numeric: oldstyle-num;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Class rules outrank the [hidden] UA rule, so state it once, here. */
+[hidden] { display: none !important; }
+
+/* ── type roles ─────────────────────────────────────────────────────────
+   One rule: if a machine produced it, it is set in mono. That typographic
+   split is the product's thesis, so it is enforced rather than suggested. */
+
+.prose { font-family: var(--sans); }
+.mono, code, pre, samp, kbd { font-family: var(--mono); }
+
+/* The label: small caps in mono, the way a document annotates a margin. */
+.label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+.label-red { color: var(--red); }
+
+/* The ruled gutter. Metadata column, hairline, body. The repeated motif. */
+.gutter {
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, 1fr);
+  gap: 0 var(--gap);
+  align-items: start;
+}
+.gutter > .gutter-key {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-3);
+  padding-top: 2px;
+  border-right: 1px solid var(--rule);
+  padding-right: 20px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.gutter > .gutter-key b { color: var(--ink-2); font-weight: 500; display: block; }
+.gutter > .gutter-body { min-width: 0; }
+
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  min-height: 60px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+.wordmark {
+  font-family: var(--sans);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wordmark span { color: var(--red); }
+
+.masthead-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  padding-left: 20px;
+  border-left: 1px solid var(--rule);
+}
+
+.tabs { display: flex; gap: 0; margin-left: auto; flex-wrap: wrap; }
+
+.tab {
+  min-height: 44px;
+  padding: 0 16px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected='true'] { color: var(--ink); border-bottom-color: var(--red); }
+
+.masthead-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.masthead-meta .label { white-space: nowrap; }
+
+/* ── hairlines ─────────────────────────────────────────────────────────
+   Depth comes from rules and from sunken surfaces, not from shadows. */
+
+.rule      { height: 1px; background: var(--rule); border: 0; }
+.rule-firm { height: 1px; background: var(--rule-2); border: 0; }
+.rule-red  { height: 1px; background: var(--red); border: 0; }
+
+/* ── machine output ───────────────────────────────────────────────────
+   A log excerpt is evidence cut from somewhere else, so it sits on a sunken
+   surface and is set entirely in mono. */
+
+.clipping {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 340px;
+  overflow: auto;
+  tab-size: 2;
+}
+.clipping .k { color: var(--ink-3); }
+.clipping .v { color: var(--ink); }
+
+/* ── controls ──────────────────────────────────────────────────────────
+   Square by default. One radius token, applied only where a softer edge
+   helps a target be hit, not as a house style. */
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;              /* tap target, R-03 */
+  padding: 10px 18px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: var(--edge-r);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.btn:hover:not(:disabled) { background: var(--ink-2); border-color: var(--ink-2); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-quiet {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--edge);
+}
+.btn-quiet:hover:not(:disabled) { background: var(--paper-2); border-color: var(--ink-2); }
+
+/* The one filled accent button, and it is on the page to mean
+   "an open finding is attached to this action". */
+.btn-red { background: var(--red); border-color: var(--red); color: var(--paper); }
+.btn-red:hover:not(:disabled) { background: var(--red-deep); border-color: var(--red-deep); }
+
+.btn-note { font-family: var(--sans); font-size: 12px; color: var(--ink-3); }
+
+/* Focus: 2px ink with a 2px offset, so it is visible on paper, on the sunken
+   clipping surface, and on the red wash. Never removed, never relies on colour
+   alone. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── status ─────────────────────────────────────────────────────────────
+   No pills, no capsule badges, no glow. A status is a mono label, a rule,
+   and optionally the red pen. */
+
+.status {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.status::before {
+  content: '';
+  width: 7px; height: 7px;
+  border: 1px solid var(--edge);
+  align-self: center;
+  flex: none;
+}
+.status-open::before { background: var(--red); border-color: var(--red); }
+.status-done::before { background: transparent; border-color: var(--ink-3); }
+.status-red { color: var(--red); }
+
+/* ── findings ──────────────────────────────────────────────────────────
+   The reviewer's mark. Used for unresolved findings and nothing else. */
+
+.finding {
+  background: var(--red-wash);
+  border: 1px solid #E3C4BF;
+  border-radius: 2px;
+  padding: 14px 16px;
+}
+.finding + .finding { margin-top: 10px; }
+.finding-open {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 14px 16px;
+}
+.finding-open + .finding-open { margin-top: 10px; }
+
+/* ── tables ────────────────────────────────────────────────────────────
+   The gutter idea applied to rows: the identifying key in mono, the prose
+   in the reading face, one firm rule under the header and nothing else. */
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+.tbl th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0 16px 9px 0;
+  border-bottom: 1px solid var(--rule-2);
+  white-space: nowrap;
+}
+.tbl td {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  vertical-align: top;
+}
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .key { font-family: var(--mono); font-size: 13px; color: var(--ink); white-space: nowrap; }
+.tbl .num { font-family: var(--mono); font-size: 14px; color: var(--ink); }
+.tbl .red { color: var(--red); }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── states ────────────────────────────────────────────────────────────
+   Empty, loading and error are designed, not defaulted. */
+
+.state {
+  border: 1px dashed var(--rule-2);
+  border-radius: 2px;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 15px;
+  max-width: 46ch;
+  margin-inline: auto;
+}
+.state strong { display: block; color: var(--ink-2); font-weight: 500; margin-bottom: 4px; }
+.state-error { border-style: solid; border-color: var(--red); color: var(--red-deep); background: var(--red-wash); text-align: left; }
+.state-error strong { color: var(--red); }
+
+.spin {
+  display: inline-block;
+  width: 13px; height: 13px;
+  border: 1.5px solid var(--ink-3);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 720ms linear infinite;
+  vertical-align: -2px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Visually hidden, still announced. */
+.vh {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

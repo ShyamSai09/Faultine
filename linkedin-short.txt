@@ -1,0 +1,21 @@
+# Short version — under 800 characters, per the content guide.
+
+An on-call alert fired with no deploy in 30 days. The agent linked it to two
+outages from March and June, flagged two *other* services running the same broken
+config, and pointed at a postmortem action written twice and closed never.
+
+Vector search can't do that. It finds the postmortem that resembles your alert —
+it can't join that March incident to an unclosed action item in a separate memory
+bank, or tell you the answer sentence didn't exist until the memory formed it.
+
+[Hindsight](https://hindsight.vectorize.io/) consolidates facts into
+evidence-backed observations, so "which services are still exposed" is a belief
+the bank holds and rewrites, not a document you retrieve.
+
+Scored against a hand-labelled key: 83%, miss included. Same model, memory off,
+zero prior incidents, no runbook.
+
+Code: REPO_URL
+Full write-up: REPO_URL
+
+#AIAgents #AgentMemory #Hindsight #AI

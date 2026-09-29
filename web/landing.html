@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Faultline: the incident you have not had yet</title>
+<meta name="description" content="An on-call agent that remembers every outage, and tells you which one is about to happen again. Built on Hindsight agent memory." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/base.css" />
+<link rel="stylesheet" href="/static/landing.css" />
+</head>
+<body>
+
+<header class="masthead">
+  <a class="wordmark" href="/">F<span>aultline</span></a>
+  <span class="masthead-sub">incident memory for on-call teams</span>
+  <nav class="masthead-nav" aria-label="Page sections">
+    <a href="#the-alert">The alert</a>
+    <a href="#before-after">Before and after</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#how">How it works</a>
+    <a href="/guide/START_HERE.md">Docs</a>
+    <a href="/docs">API</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ── opening ────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <p class="kicker label">Postmortem follow-through, as software</p>
+    <h1>The incident you have not had yet.</h1>
+    <p class="standfirst">
+      A postmortem from March said to check the other nine services for the same problem.
+      Nobody did. In June a different service broke the same way and nobody made the
+      connection. In September a third one did, and two more are still broken in exactly
+      the same way, right now, without anyone being paged.
+    </p>
+    <p class="standfirst">
+      Faultline is an on-call agent that never forgets. It tells you which failure mode this
+      alert is, which past incidents share the cause, which runbook fixed them, which other
+      services are still carrying the fault, and whether the fix was ever written down and
+      closed.
+    </p>
+    <div class="cta-row">
+      <a class="btn" href="/console?autotriage=1">Open the console with the demo running</a>
+      <a class="btn btn-quiet" href="/console">Open the console empty</a>
+    </div>
+  </section>
+
+  <!-- ── the alert ──────────────────────────────────────────────────── -->
+  <section id="the-alert" class="band">
+    <div class="col-text">
+      <p class="band-label label">09:14 &nbsp;·&nbsp; 28 Sep &nbsp;·&nbsp; ALR-4471 &nbsp;·&nbsp; SEV2</p>
+      <h2>It ships with no deploy in thirty days.</h2>
+      <p class="lede">
+        Which means a code change cannot explain it. And the last successful credential use
+        was eleven days ago, so the fault has been sitting behind a cached token the whole
+        time. That gap is the tell.
+      </p>
+    </div>
+    <div class="col-wide">
+      <pre class="clipping" id="alert-clip"></pre>
+      <p class="caption">
+        Shown verbatim, because this exact text is what the agent matches against. Paraphrasing
+        it would misrepresent the task.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── before and after ───────────────────────────────────────────── -->
+  <section id="before-after" class="band band-tint">
+    <div class="col-text">
+      <p class="band-label label">The control &nbsp;·&nbsp; same model, one bank never written to</p>
+      <h2>Same alert. Same model. One difference.</h2>
+      <p class="lede">
+        Most demonstrations of this compare a good question against a deliberately bad one,
+        which proves nothing, because the obvious objection is that the bad one was rigged.
+        These two runs go through the identical system: same model, same four-way retrieval,
+        same instructions, same question. One bank holds nineteen incidents. The other was
+        created once and never written to. Memory is the only variable.
+      </p>
+    </div>
+
+    <div class="col-wide">
+      <div class="compare">
+        <div class="compare-col">
+          <p class="label">Memory on</p>
+          <pre class="clipping on">MATCH: 100
+INCIDENTS: INC-1042, INC-1188
+RUNBOOK: RB-07
+CAUSE: Wildcard trust policy in the shared
+  service-role Terraform module
+OPEN_ACTION: fleet-wide sweep, promised 2x</pre>
+          <p class="caption">
+            Names the failure mode, cites March on <code>payments-api</code> and June on
+            <code>checkout-web</code>, gives the runbook, and reports that the sweep was
+            promised twice and never done.
+          </p>
+        </div>
+        <div class="compare-col">
+          <p class="label">Memory off</p>
+          <pre class="clipping">MATCH: 0
+INCIDENTS: none
+RUNBOOK: none
+CAUSE: Incorrect IAM trust policy or missing
+  cross-account principal permissions
+OPEN_ACTION: none</pre>
+          <p class="caption">
+            Still identifies an identity permission problem, from the error text alone. The
+            model is not the weak link. The missing memory is.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── evidence ───────────────────────────────────────────────────── -->
+  <section id="evidence" class="band">
+    <div class="col-text">
+      <p class="band-label label">83% &nbsp;·&nbsp; 5 of 6 &nbsp;·&nbsp; measured, no model calls</p>
+      <h2>Scored, not asserted.</h2>
+      <p class="lede">
+        Nineteen incidents, hand-labelled into clusters of shared root cause. For each one we
+        ask the memory to recall the failure mode and check which of its true siblings come
+        back. Only <code>recall</code> is involved, so it ranks locally and costs nothing to
+        repeat.
+      </p>
+    </div>
+
+    <figure class="shot">
+      <img src="/static/img/console.png" alt="The Faultline console showing a 100 percent match, two prior incidents sharing a root cause, and a red list of services still exposed to the same broken configuration." loading="lazy" />
+      <figcaption>
+        The console. A 100 percent match, two prior incidents, and the list of services still
+        carrying the fault.
+      </figcaption>
+    </figure>
+
+    <div class="col-text">
+      <div class="findings">
+        <div class="finding">
+          <div class="finding-key"><b>Still exposed elsewhere</b><span class="label label-red">SEV2</span></div>
+          <p>Two services carry the same broken trust policy today and have not failed yet.
+             Nobody gets paged for those. They wait for their turn.</p>
+          <div class="ev">read from the recorded infrastructure state, not guessed</div>
+        </div>
+        <div class="finding">
+          <div class="finding-key"><b>Promised 2&times;</b><span class="label label-red">never closed</span></div>
+          <p>The fleet-wide sweep. Written after the March incident, written again after June.
+             An unclosed action is the only evidence that a second and third outage were
+             avoidable.</p>
+          <div class="ev">raised in INC-1042, cross-referenced from INC-1188</div>
+        </div>
+      </div>
+
+      <h3 class="sub-head">The one it gets wrong</h3>
+      <p class="lede">
+        A thread pool starved by an HTTP call with no timeout, and a webhook relay that burned
+        its entire daily quota retrying 429s with no backoff. Identical anti-pattern, almost no
+        shared vocabulary, so retrieval did not connect them. It sits in the table on the
+        Learning curve tab, in red, next to the four that worked.
+      </p>
+      <p class="lede">
+        Half the original answer key was also wrong. Three clusters grouped incidents that
+        shared a theme but not a root cause. Cutting them took the score from 55 to 83 percent
+        without changing a line of the system. The number was flattering because the key was
+        wrong.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── how it works ───────────────────────────────────────────────── -->
+  <section id="how" class="band band-tint">
+    <div class="col-text">
+      <p class="band-label label">Why a search box cannot do this</p>
+      <h2>Three answers that are not in any document.</h2>
+      <p class="lede">
+        Retrieval finds documents that look similar. Each of the following is a conclusion the
+        source documents do not contain, which is why searching for it cannot return it.
+      </p>
+    </div>
+
+    <div class="col-wide">
+      <div class="claims">
+        <div class="claim">
+          <p class="label num">01</p>
+          <h3>A belief formed across four documents</h3>
+          <p>
+            To say two unrelated services both carry an insecure setting, the system reads
+            four records about four services and concludes they share a property written
+            down in none of them. Hindsight's observation consolidation does exactly that,
+            and rewrites the belief when the evidence changes rather than appending to it.
+          </p>
+        </div>
+        <div class="claim">
+          <p class="label num">02</p>
+          <h3>A link between two separate stores</h3>
+          <p>
+            Saying a fix was promised twice and never done means starting at an incident in
+            the technical memory, following it to a to-do item in a different memory, and
+            noticing a third item raised after a different incident three months earlier.
+            That is a traversal between isolated banks. Similarity is not a traversal.
+          </p>
+        </div>
+        <div class="claim">
+          <p class="label num">03</p>
+          <h3>What used to be true, alongside what is</h3>
+          <p>
+            Time filtering only works if memories carry their original timestamps, and
+            consolidation only works if history is preserved rather than overwritten. Stamp
+            incidents with today's date and the system can no longer say this also happened
+            in March, which is the entire value.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-text">
+      <p class="lede">
+        One more thing, plainly. The model was asked which services were exposed and listed two
+        that had already been patched, because they appeared in the incidents it had just
+        cited. Defensible reasoning, wrong answer, and expensive during an outage. So the code
+        stopped asking. The model now reports which condition matches, and the list of affected
+        services is read from recorded state.
+      </p>
+      <p class="lede lede-strong">
+        Let the model do the judgement and the code do the bookkeeping.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── honest scope ───────────────────────────────────────────────── -->
+  <section id="scope" class="band">
+    <div class="col-text">
+      <p class="band-label label">Scope</p>
+      <h2>What this is not</h2>
+    </div>
+    <div class="col-text">
+      <ul class="plain-list">
+        <li>Not a production service. No authentication, no multi-tenancy, no audit trail.
+            Do not point it at real infrastructure.</li>
+        <li>Not a claim about anyone's incident history. The 83 percent is a measurement on
+            nineteen constructed incidents, twelve of them hand-labelled.</li>
+        <li>Not complete. It only knows what was retained into it. An outage nobody wrote
+            down is an outage it never saw.</li>
+        <li>Not evidence of adoption. There are no users, so there is no user count, and no
+            testimonials, because inventing them would be the single most dishonest thing on
+            this page.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="col-text">
+    <p>
+      <a href="/guide/START_HERE.md">Start here</a> is a ten-minute page for newcomers, with no
+      jargon. <a href="/guide/HOW_IT_WORKS.md">How it works</a> names the memory feature behind
+      every step, <a href="/guide/THE_NUMBERS.md">the numbers</a> explains exactly where each
+      figure comes from, and the API reference is at <a href="/docs">/docs</a>.
+    </p>
+    <p class="built">
+      Built with <a href="https://hindsight.vectorize.io/">Hindsight</a> agent memory by
+      <a href="https://vectorize.io/">Vectorize</a>. The company, its services and its incidents
+      are invented; every failure mode is lifted from a real postmortem.
+    </p>
+  </div>
+</footer>
+
+<script src="/static/landing.js"></script>
+</body>
+</html>

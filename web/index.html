@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Console - Faultline</title>
+<meta name="description" content="Faultline console: incident triage grounded in Hindsight memory." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/static/base.css" />
+<link rel="stylesheet" href="/static/console.css" />
+</head>
+<body>
+
+<!-- Boot. Covers the console until memory is confirmed reachable. -->
+<div class="boot" id="boot">
+  <div class="boot-in">
+    <h1>Faultline</h1>
+    <p id="boot-msg">Connecting to Hindsight memory</p>
+    <div class="boot-bar"><i id="boot-fill"></i></div>
+    <div class="boot-stage">
+      <span class="label" id="boot-stage">starting</span>
+      <span class="label" id="boot-detail"></span>
+    </div>
+  </div>
+</div>
+
+<header class="masthead">
+  <a class="wordmark" href="/">F<span>aultline</span></a>
+  <span class="masthead-sub">incident console</span>
+
+  <nav class="tabs" role="tablist" aria-label="Console views">
+    <button class="tab" role="tab" id="tab-console" aria-controls="view-console" aria-selected="true" data-view="console">Console</button>
+    <button class="tab" role="tab" id="tab-curve" aria-controls="view-curve" aria-selected="false" data-view="curve">Learning curve</button>
+    <button class="tab" role="tab" id="tab-memory" aria-controls="view-memory" aria-selected="false" data-view="memory">Memory</button>
+    <button class="tab" role="tab" id="tab-corpus" aria-controls="view-corpus" aria-selected="false" data-view="corpus">Corpus</button>
+  </nav>
+
+  <div class="masthead-meta">
+    <span class="label" id="mode">checking</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ CONSOLE ═══════ -->
+<main id="view-console" role="tabpanel" aria-labelledby="tab-console" class="view">
+  <div class="console">
+
+    <!-- ── left: the alert ── -->
+    <div class="col">
+      <div class="col-head">
+        <h2>Incoming alert</h2>
+        <span class="label label-red" id="alert-sev">SEV2</span>
+      </div>
+
+      <div class="sheet">
+        <section>
+          <div class="alert-meta label" id="alert-meta"></div>
+          <div class="clipping" id="alert-text"></div>
+        </section>
+
+        <section>
+          <h3 class="label" style="margin-bottom:8px">Raw evidence</h3>
+          <pre class="clipping" id="alert-evidence"></pre>
+        </section>
+
+        <section>
+          <p class="note" id="alert-note"></p>
+        </section>
+
+        <section>
+          <button class="btn btn-quiet" id="btn-own" aria-expanded="false" aria-controls="own-panel" style="width:100%">
+            Triage a different alert instead
+          </button>
+          <div id="own-panel" hidden style="margin-top:14px">
+            <label class="label" for="own-service" style="display:block;margin-bottom:6px">Service</label>
+            <input class="own-input" id="own-service" placeholder="checkout-web" />
+            <label class="label" for="own-text" style="display:block;margin:12px 0 6px">Alert text, pasted verbatim</label>
+            <textarea class="own-input mono" id="own-text" rows="6" placeholder="[CRITICAL] checkout-web checkout_error_rate=0.38 over 5m window&#10;  error: Postgres ERROR: deadlock detected on ledger_entries&#10;  deadlocks: 37 in 5m"></textarea>
+            <div class="stack" style="margin-top:12px">
+              <button class="btn" id="btn-own-run" style="width:100%">Triage this alert</button>
+              <button class="btn btn-quiet" id="btn-own-clear" style="width:100%">Back to the demo alert</button>
+            </div>
+            <p class="hint" style="margin-top:10px">
+              Runs the same pipeline over your alert. If the memory has never seen this failure
+              mode it will say so and invent nothing, which is the correct answer.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <div class="switch-row">
+            <label class="switch">
+              <input type="checkbox" id="memory-toggle" checked />
+              <span class="switch-box" aria-hidden="true"></span>
+              <span class="switch-text">
+                <b>Memory</b>
+                <span id="switch-state">on, grounded in Hindsight</span>
+              </span>
+            </label>
+          </div>
+          <div class="stack" style="margin-top:14px">
+            <button class="btn btn-red triage-btn" id="btn-triage">
+              <span class="t" id="triage-label">Triage alert</span>
+              <span class="s" id="triage-sub">recall, then reflect, then answer</span>
+            </button>
+            <p class="hint" id="triage-hint">
+              Turn memory off and triage again. Same alert, same model, no memory at all.
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ── centre: the answer ── -->
+    <div class="col">
+      <div class="col-head">
+        <h2 id="answer-title">Agent response</h2>
+        <span class="label" id="answer-pill" hidden></span>
+      </div>
+
+      <div id="answer-empty" class="state">
+        <strong>Nothing triaged yet</strong>
+        An alert is waiting. Triage it to find out whether this organisation has been here before.
+      </div>
+
+      <div id="answer-loading" class="state" hidden>
+        <p><span class="spin" aria-hidden="true"></span> <span id="loading-msg">Recalling memory</span></p>
+      </div>
+
+      <div id="answer-error" class="state state-error" hidden>
+        <strong>Triage failed</strong>
+        <p id="answer-error-msg"></p>
+      </div>
+
+      <div id="answer" hidden>
+        <div class="verdict">
+          <div class="match">
+            <span class="match-n" id="match-n">--</span>
+            <span class="label match-l">match</span>
+          </div>
+          <div class="verdict-body">
+            <p id="verdict"></p>
+            <div class="verdict-tags" id="verdict-tags"></div>
+            <p class="match-r" id="match-r"></p>
+          </div>
+        </div>
+
+        <section style="margin-top:26px">
+          <h3 class="label" style="margin-bottom:6px">Prior incidents with the same root cause</h3>
+          <div class="refs" id="refs"></div>
+        </section>
+
+        <section style="margin-top:26px;padding-top:22px;border-top:1px solid var(--rule)">
+          <h3 class="label" style="margin-bottom:6px">What to do first</h3>
+          <ol class="steps" id="steps"></ol>
+        </section>
+
+        <section id="blk-exposed" style="margin-top:26px;padding-top:22px;border-top:1px solid var(--rule)" hidden>
+          <h3 class="label label-red" style="margin-bottom:6px">Still exposed elsewhere</h3>
+          <p class="sub" style="font-size:15px;color:var(--ink-3);margin-bottom:12px">
+            Failure modes this memory already understands, loaded in a service that has not broken yet.
+          </p>
+          <div class="findings" id="exposed"></div>
+        </section>
+
+        <section id="blk-promised" style="margin-top:26px;padding-top:22px;border-top:1px solid var(--rule)" hidden>
+          <h3 class="label label-red" style="margin-bottom:6px">Remediation that was never completed</h3>
+          <p class="sub" style="font-size:15px;color:var(--ink-3);margin-bottom:12px">
+            An unclosed action means the problem is still loaded somewhere.
+          </p>
+          <div class="findings" id="promised"></div>
+        </section>
+
+        <div class="baseline-wrap" id="baseline-wrap" hidden>
+          <h3 class="label" style="margin-bottom:8px">Same alert, no memory</h3>
+          <pre class="clipping" id="baseline"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── right: the memory ── -->
+    <div class="col col-memory col-narrow">
+      <div class="col-head">
+        <h2>Memory</h2>
+        <span class="label" id="mem-state">idle</span>
+      </div>
+
+      <div class="sheet">
+        <div class="measures">
+          <div class="measure"><b id="m-recalled">0</b><span class="label">recalled</span></div>
+          <div class="measure"><b id="m-models">0</b><span class="label">mental models</span></div>
+        </div>
+
+        <section>
+          <h3 class="label" style="margin-bottom:6px">Recalled for this alert</h3>
+          <div class="mems" id="mems">
+            <p class="hint">Nothing recalled yet.</p>
+          </div>
+        </section>
+
+        <section>
+          <h3 class="label" style="margin-bottom:8px">Fingerprints <span style="color:var(--ink-3)">mental model</span></h3>
+          <div class="mm-tabs" id="mm-tabs" role="tablist" aria-label="Mental models"></div>
+          <div class="mm-body" id="mm-body">
+            <p class="hint">Written by Hindsight in the background after consolidation.</p>
+          </div>
+        </section>
+
+        <section>
+          <h3 class="label" style="margin-bottom:6px">Close the loop</h3>
+          <p class="hint" style="margin-bottom:12px">
+            Retaining the outcome is what makes the fingerprint stronger. Next time this alert fires,
+            the match gets sharper.
+          </p>
+          <button class="btn btn-quiet" id="btn-resolve" disabled style="width:100%">
+            Record resolution and refresh fingerprints
+          </button>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════ LEARNING CURVE ════ -->
+<main id="view-curve" role="tabpanel" aria-labelledby="tab-curve" class="view" hidden>
+  <div class="page">
+    <h1>Does the memory actually connect these incidents?</h1>
+    <p class="lede">
+      Every incident sits in a hand-labelled cluster of failures that share a root cause. For each one
+      we ask Hindsight to recall the failure mode and check which of its true siblings come back.
+      Only <code>recall</code> is involved: no generation, no model call, just BM25, the entity
+      graph, temporal filters and a cross-encoder ranking locally.
+    </p>
+
+    <section>
+      <div class="measures-4" id="curve-measures"></div>
+    </section>
+
+    <section>
+      <h3>Recall of related incidents, cumulative</h3>
+      <div class="chart" id="curve-chart"></div>
+      <p class="sub" id="curve-note"></p>
+    </section>
+
+    <section>
+      <h3>Per incident</h3>
+      <div class="tbl-wrap"><table class="tbl" id="curve-table"></table></div>
+    </section>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ MEMORY ══════ -->
+<main id="view-memory" role="tabpanel" aria-labelledby="tab-memory" class="view" hidden>
+  <div class="page">
+    <h1>What Hindsight actually holds</h1>
+    <p class="lede">
+      Two banks, isolated from each other. <code>faultline-incidents</code> holds the technical
+      corpus; <code>faultline-team</code> holds ownership and commitments. Strict isolation is why a
+      query about what broke is never diluted by who owes what.
+    </p>
+
+    <section>
+      <div class="querybar">
+        <input id="mem-q" type="search" placeholder="wildcard trust policy, Hikari pool, TTL jitter" aria-label="Search memory" />
+        <button class="btn btn-quiet" id="btn-mem-q">Recall</button>
+        <button class="btn btn-quiet" id="btn-mem-list">Browse</button>
+      </div>
+      <div class="mems" id="mem-raw"><p class="hint">Load memory to inspect it.</p></div>
+    </section>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ CORPUS ══════ -->
+<main id="view-corpus" role="tabpanel" aria-labelledby="tab-corpus" class="view" hidden>
+  <div class="page">
+    <h1>Northwind Commerce</h1>
+    <p class="lede" id="corpus-lede"></p>
+
+    <section>
+      <div class="measures-4" id="corpus-measures"></div>
+    </section>
+
+    <section>
+      <h3>Incidents</h3>
+      <div class="tbl-wrap"><table class="tbl" id="corpus-table"></table></div>
+    </section>
+
+    <section>
+      <h3>Remediation never completed</h3>
+      <p class="sub">These are the items that make a second outage possible.</p>
+      <div class="tbl-wrap"><table class="tbl" id="action-table"></table></div>
+    </section>
+  </div>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

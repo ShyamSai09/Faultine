@@ -1,0 +1,5 @@
+hindsight-all[local-llm]>=0.8.6
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-dotenv>=1.0
+google-genai>=1.0
